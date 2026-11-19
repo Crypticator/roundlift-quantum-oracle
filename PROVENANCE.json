@@ -1,0 +1,55 @@
+{
+  "inputs": [
+    {
+      "object": "Thesis",
+      "archive": "THESE_II_FINAL_V0_6_TAMPON_BOOM_2026-11-19.zip",
+      "sha256": "3a71233d688393b6eea341ec5921e87bbf8bc210b13b7a4cb6f1a2b6f5174840",
+      "manifest_entries": 14
+    },
+    {
+      "object": "Article 1",
+      "archive": "BOOM_ARTICLE1_V1_1_DOSSIER_FINAL.zip",
+      "sha256": "8da09a567c21719232d28cd039a97e74382641e3fb76fc8c8368b90bd185bc1d",
+      "manifest_entries": 32,
+      "source_version": "1.1",
+      "source_md_sha256": "005654184c364751e53b1a778f6dc06639163d5845ec4c863f373b093adcedb6"
+    },
+    {
+      "object": "Article 2",
+      "archive": "ARTICLE2_CLOSED_V4_2_REPRODUCIBLE.zip",
+      "sha256": "7a05a8b0816dd7893814d2e5e9f6a79e5b33fed3fc832c29c165296a3d15fc6f",
+      "manifest_entries": 14,
+      "source_version": "4.2",
+      "source_md_sha256": "8655f280ac868861508c125da8c93c84d8af302fcfb761342e579c8a9b64d76e",
+      "archived_original_md_sha256": "c9fd2345ab7f7d763afbd74d7eacb3b528a681cefd2357b3dca89c3e9b62fe84"
+    },
+    {
+      "object": "Article 3",
+      "archive": "ARTICLE3_CLOSED_V4_3_REPRODUCIBLE.zip",
+      "sha256": "b6a560ac12a2b0fca592a6f1b5ca51ccb4953fed3876229c3653ce5663a2319e",
+      "manifest_entries": 14,
+      "source_version": "4.3",
+      "source_md_sha256": "f153539c193bcc8e0ee1c52169716bfe03cc2f820055778c600b89001808d326",
+      "archived_original_md_sha256": "a2f850d10e3a3278b07a16af1f3cc9b5509c81fd7e11b971d83f4b42b44d73cb"
+    },
+    {
+      "object": "Article 4",
+      "archive": "ARTICLE4_CLOSED_V4_4_REPRODUCIBLE.zip",
+      "sha256": "940263eee93b54ff7ce9f55f738d645bd4b949d967cb51fa71522aac58c03ffc",
+      "manifest_entries": 47,
+      "source_version": "4.4",
+      "source_md_sha256": "cc514d95bda28ec1a28bfc044574fbb3266dcefdb1e07cbe17aa7ade4cc89914",
+      "archived_original_md_sha256": "5a68133d2ea770119c73f0137dd1b86c133407052c780665ecde0bb05f63c10f"
+    }
+  ],
+  "companion_crosscheck": {
+    "archive": "THESIS_II_CORRECTED_ARTICLES_V4_2026-11-13.zip",
+    "sha256": "8ef31bd25b4e56daa1fb75bccc513aa85b7ac4fbf8f7621dfe68bc8e712ef808",
+    "manifest_entries": 57,
+    "articles_verified_against_collection": [
+      2,
+      3,
+      4
+    ]
+  }
+}

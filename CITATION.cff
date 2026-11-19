@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: For the thesis, use the preferred citation. For a companion paper, use the CITATION.cff in its article directory.
+title: Thesis II and its four companion papers
+authors:
+- &id001
+  family-names: Bouftass
+  given-names: Samir
+version: '0.6'
+preferred-citation:
+  type: thesis
+  title: 'From Correctness to the Quantum Oracle: Exact Modular Rounding, Structured Cryptanalysis, and Conditional Security
+    of C1-K4'
+  authors:
+  - *id001
+  version: '0.6'
+  year: 2026
+references:
+- type: unpublished
+  title: 'C1-K4-P12-CBD1: Exact Correctness, Conditional Security, and Reproducible Attack Estimates'
+  authors:
+  - *id001
+  version: '1.1'
+  year: 2026
+- type: unpublished
+  title: 'C1-K4 in the QROM: Structural Bounds and a Conservative Conditional Reduction'
+  authors:
+  - *id001
+  version: '4.2'
+  year: 2026
+- type: unpublished
+  title: 'A Quotient–Remainder Calculus for Modular Rounding: Exact Carries, Distributional Laws, Nested Truncation, and the
+    Boundary with Learning With Rounding'
+  authors:
+  - *id001
+  version: '4.3'
+  year: 2026
+- type: unpublished
+  title: Find-Failing-Plaintext Analysis of C1-K4-P12-CBD1
+  authors:
+  - *id001
+  version: '4.4'
+  year: 2026
