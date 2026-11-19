@@ -1,0 +1,832 @@
+# Article 3 — A Quotient–Remainder Calculus for Modular Rounding
+
+**Revision V4.3 — 13 November 2026 — arithmetic closure, explicit distributional scope and reproducibility**
+
+## Exact Carries, Distributional Laws, Nested Truncation, and the Boundary with Learning With Rounding
+
+**Samir Bouftass**
+
+*Research assistance: ChatGPT (OpenAI). Samir Bouftass is responsible for the scientific content of this archival edition.*
+
+## Abstract
+
+We isolate the arithmetic layer underlying modular reduction followed by integer division. For positive integers \(M,D,L\) satisfying \(M=DL\), define
+\[
+Q_{M,D}(x)=\left\lfloor\frac{[x]_M}{D}\right\rfloor,\qquad
+R_{M,D}(x)=[x]_M-DQ_{M,D}(x),
+\]
+where \([x]_M\in\{0,\ldots,M-1\}\) is the canonical residue.
+
+The quotient and remainder maps form a bijective coordinate system on \(\mathbb Z_M\). We give exact addition, multioperand, multiplication, and nested-truncation identities that retain the discarded remainders and therefore the carries they induce. We record exact distributional consequences: uniform quotient and remainder are independent for a uniform residue, randomized lifting is exact, quotient extraction decreases min-entropy by at most the logarithm of the fiber size, and observing the quotient leaks at most the logarithm of the quotient alphabet.
+
+The cryptographic interpretation is deliberately conservative. When \(M=DL\), the scalar map \(Q_{M,D}\) is exactly the *floor-rounding* map used in one standard formulation of Learning With Rounding (LWR):
+\[
+Q_{M,D}(x)=\left\lfloor\frac{L}{M}[x]_M\right\rfloor.
+\]
+Thus modular reduction followed by exact integer division is not, by itself, a new hardness assumption. This identity is convention-dependent: nearest-integer LWR is generally a different quantizer. Moreover, equality of quantizers does not identify structured problems. Plain LWR, Ring/Module-LWR, middle-product LWR, and Hankel/Toeplitz rounded observations can differ in public-operator distribution, secret distribution, basis, sample structure, and hardness assumptions.
+
+The purpose of this article is therefore not to claim new LWR hardness. It provides a precise quotient–remainder calculus and a boundary theorem that prevents deterministic rounding, structured linear algebra, and computational hardness from being conflated.
+
+---
+
+# 1. Scope and contribution boundary
+
+The arithmetic identities below are elementary consequences of Euclidean division. They are not claimed as new number theory. Their value is organizational: they expose exactly which discarded residues determine carries and make explicit when a MODDIV-style quantizer coincides with an established LWR quantizer.
+
+We distinguish four levels:
+
+**ARITHMETIC IDENTITY.** A theorem true for every admissible integer input.
+
+**DISTRIBUTIONAL FACT.** A theorem requiring an explicitly stated probability law.
+
+**PROBLEM IDENTIFICATION.** Equality of two full distributions after matching all public operators, secret laws, moduli, bases, and rounding conventions.
+
+**HARDNESS CLAIM.** A computational reduction or assumption. None is proved merely by the quotient identities.
+
+This hierarchy is essential. The same scalar rounding function may occur in two cryptosystems whose underlying computational problems are not equivalent.
+
+---
+
+# 2. Quotient–remainder coordinates
+
+Let
+\[
+M=DL,\qquad D,L\ge1.
+\]
+
+For \(x\in\mathbb Z\), let \([x]_M\in\{0,\ldots,M-1\}\) denote the canonical residue.
+
+Define
+\[
+Q_{M,D}(x)=\left\lfloor\frac{[x]_M}{D}\right\rfloor
+\in\{0,\ldots,L-1\},
+\]
+and
+\[
+R_{M,D}(x)=[x]_M-DQ_{M,D}(x)
+\in\{0,\ldots,D-1\}.
+\]
+
+## Theorem 1 — Exact decomposition
+
+For every integer \(x\),
+\[
+\boxed{
+[x]_M=DQ_{M,D}(x)+R_{M,D}(x)
+}
+\]
+with
+\[
+0\le R_{M,D}(x)<D.
+\]
+
+The representation is unique.
+
+### Proof
+
+Apply Euclidean division to the canonical representative \([x]_M\) by \(D\). Since \([x]_M<DL\), the quotient lies in \(\{0,\ldots,L-1\}\). ∎
+
+## Corollary 1 — Coordinate bijection
+
+The map
+\[
+[x]_M\longmapsto
+\bigl(Q_{M,D}(x),R_{M,D}(x)\bigr)
+\]
+is a bijection
+\[
+\mathbb Z_M
+\longleftrightarrow
+\mathbb Z_L\times\{0,\ldots,D-1\}.
+\]
+
+Consequently, retaining both quotient and remainder loses no information modulo \(M\). This is a bijection of finite sets, not a claim of a product-group isomorphism or an application requiring coprime factors.
+
+---
+
+# 3. Fibers, uniformity, and exact randomized lifting
+
+## Proposition 2 — Equal fibers
+
+Here the inverse image is taken in \(\mathbb Z_M\), represented by \(0,\ldots,M-1\). For every \(q\in\mathbb Z_L\),
+\[
+Q_{M,D}^{-1}(q)
+=
+\{Dq,Dq+1,\ldots,Dq+D-1\}.
+\]
+
+Hence every fiber has exactly \(D\) elements.
+
+## Theorem 3 — Uniform quotient–remainder independence
+
+Let
+\[
+X\leftarrow U(\mathbb Z_M).
+\]
+
+Then
+\[
+Q_{M,D}(X)\leftarrow U(\mathbb Z_L),
+\]
+\[
+R_{M,D}(X)\leftarrow U(\mathbb Z_D),
+\]
+and these two variables are independent.
+
+### Proof
+
+The coordinate map of Corollary 1 is a bijection from \(M=DL\) equally likely points to \(L\times D\) equally likely pairs. ∎
+
+## Corollary 3 — Exact randomized lift
+
+If
+\[
+U\leftarrow U(\mathbb Z_L),
+\qquad
+\rho\leftarrow U(\mathbb Z_D)
+\]
+independently, then
+\[
+B=DU+\rho
+\]
+is uniform modulo \(M\), and
+\[
+Q_{M,D}(B)=U,\qquad R_{M,D}(B)=\rho.
+\]
+
+The lift \(B\) is not independent of \(U\) when \(L>1\): \(U\) is a nonconstant deterministic function of \(B\). When \(L=1\), \(U\) is constant and hence independent of every variable. Security simulations must preserve the joint law, including any public side information.
+
+In particular, if \(X\) is uniform independently of a finite public variable \(Z\), then the pair \((Q(X),R(X))\) is jointly uniform independently of \(Z\). The reverse simulation samples \(U\) uniformly independently of \(Z\), and \(\rho\) uniformly independently of \((Z,U)\). Marginal uniformity alone does not suffice: with \(M=4,D=L=2\), take a uniform bit \(Z\), set \(U=Z\), and choose an independent uniform bit \(\rho\). Then \(2U+\rho\) is marginally uniform, but its quotient reveals \(Z\) exactly.
+
+---
+
+# 4. Exact addition and carries
+
+Let
+\[
+[x]_M=Dq_x+r_x,\qquad
+[y]_M=Dq_y+r_y.
+\]
+
+## Theorem 4 — Addition identity
+
+\[
+\boxed{
+Q_{M,D}(x+y)
+=
+\left[
+q_x+q_y+
+\left\lfloor\frac{r_x+r_y}{D}\right\rfloor
+\right]_L
+}
+\]
+and
+\[
+\boxed{
+R_{M,D}(x+y)
+=
+[r_x+r_y]_D.
+}
+\]
+
+The carry
+\[
+C_D(r_x,r_y)
+=
+\left\lfloor\frac{r_x+r_y}{D}\right\rfloor
+\]
+belongs to \(\{0,1\}\).
+
+### Proof
+
+Write
+\[
+r_x+r_y=D C_D+t,\qquad0\le t<D.
+\]
+Then
+\[
+x+y\equiv
+D(q_x+q_y+C_D)+t\pmod{DL}.
+\]
+Reducing the quotient modulo \(L\) and retaining the remainder \(t\) gives the result. ∎
+
+## Corollary 4 — Exact characterization of additivity
+
+As an additive map
+\[
+Q_{M,D}:\mathbb Z_M\to\mathbb Z_L,
+\]
+the quotient map is a group homomorphism if and only if
+\[
+D=1
+\quad\text{or}\quad
+L=1.
+\]
+
+### Proof
+
+The two boundary cases are the identity map and the zero map. If \(D>1\) and \(L>1\), then
+\[
+Q(1)=Q(D-1)=0
+\]
+but
+\[
+Q(D)=1,
+\]
+so additivity fails. ∎
+
+Thus the nonlinearity of quotient extraction is exactly visible as a carry term; it is not evidence of one-wayness.
+
+---
+
+# 5. Multioperand carries
+
+Suppose
+\[
+[x_i]_M=Dq_i+r_i,\qquad0\le r_i<D,
+\]
+for \(i=1,\ldots,t\), where \(t\ge1\).
+
+## Theorem 5 — Multioperand quotient identity
+
+\[
+\boxed{
+Q_{M,D}\!\left(\sum_{i=1}^{t}x_i\right)
+=
+\left[
+\sum_iq_i+
+\left\lfloor
+\frac{\sum_i r_i}{D}
+\right\rfloor
+\right]_L
+}
+\]
+and
+\[
+\boxed{
+R_{M,D}\!\left(\sum_i x_i\right)
+=
+\left[\sum_i r_i\right]_D.
+}
+\]
+
+The aggregate carry lies in
+\[
+\{0,\ldots,t-1\}.
+\]
+
+### Proof
+
+Write \(\sum_i r_i=Dc+r\), where \(0\le r<D\). Then \(\sum_i x_i\equiv D(\sum_iq_i+c)+r\pmod{DL}\). Moreover \(0\le\sum_i r_i\le t(D-1)<tD\), so \(0\le c\le t-1\). ∎
+
+No independence of the remainders is required. In structured polynomial products these remainders can be highly correlated.
+
+---
+
+# 6. Exact multiplication calculus
+
+Let
+\[
+[x]_M=Dq_x+r_x,\qquad
+[y]_M=Dq_y+r_y.
+\]
+
+## Theorem 6 — Multiplication identity
+
+\[
+\boxed{
+Q_{M,D}(xy)
+=
+\left[
+Dq_xq_y
++q_xr_y
++q_yr_x
++\left\lfloor\frac{r_xr_y}{D}\right\rfloor
+\right]_L
+}
+\]
+and
+\[
+\boxed{
+R_{M,D}(xy)
+=
+[r_xr_y]_D.
+}
+\]
+
+### Proof
+
+Expand
+\[
+(Dq_x+r_x)(Dq_y+r_y)
+=
+D^2q_xq_y
++Dq_xr_y
++Dq_yr_x
++r_xr_y.
+\]
+Write
+\[
+r_xr_y
+=
+D\left\lfloor\frac{r_xr_y}{D}\right\rfloor
++[r_xr_y]_D.
+\]
+Dividing by \(D\) and observing that subtracting multiples of
+\[
+M=DL
+\]
+changes the quotient only by multiples of \(L\) yields the formula. ∎
+
+The term
+\[
+\left\lfloor\frac{r_xr_y}{D}\right\rfloor
+\]
+is a multiplication-induced carry. In the nondegenerate regime \(D>1,L>1\), quotients alone do not determine the quotient of a product: \(x=D\) and either \(y=0\) or \(y=1\) have the same quotient pair \((1,0)\), while their product quotients are respectively 0 and 1. When \(D=1\), the quotient retains the full residue; when \(L=1\), the output is constant. The information-loss claim excludes these two boundary cases.
+
+---
+
+# 7. Nested truncation
+
+Nested quotient extraction is exact when divisors align.
+
+Let
+\[
+M=D_1D_2L.
+\]
+
+Define
+\[
+q_1=Q_{M,D_1}(x),\qquad
+r_1=R_{M,D_1}(x).
+\]
+
+Now regard \(q_1\) as an element of
+\[
+\mathbb Z_{D_2L}.
+\]
+
+Write
+\[
+q_1=D_2q_2+r_2.
+\]
+
+## Theorem 7 — Composition law
+
+\[
+\boxed{
+Q_{D_2L,D_2}
+\bigl(Q_{M,D_1}(x)\bigr)
+=
+Q_{M,D_1D_2}(x).
+}
+\]
+
+Moreover,
+\[
+\boxed{
+R_{M,D_1D_2}(x)
+=
+D_1r_2+r_1.
+}
+\]
+
+### Proof
+
+Substitute
+\[
+[x]_M
+=
+D_1q_1+r_1
+=
+D_1(D_2q_2+r_2)+r_1.
+\]
+The remainder
+\[
+D_1r_2+r_1
+\]
+lies in
+\[
+[0,D_1D_2),
+\]
+so this is exactly the Euclidean decomposition by \(D_1D_2\). ∎
+
+This is the exact algebra behind multi-stage low-bit truncation. It does not justify truncating separate summands before their carries have been combined.
+
+---
+
+# 8. Min-entropy bounds
+
+All variables in this section are finite and classical. All logarithms are base two. Define
+\[
+H_\infty(X)=-\log_2\max_x\Pr[X=x]
+\]
+and the average conditional min-entropy by
+\[
+\widetilde H_\infty(X\mid Z)
+=-\log_2 p_{\rm guess}(X\mid Z),\qquad
+p_{\rm guess}(X\mid Z)=\sum_z\max_x\Pr[X=x,Z=z].
+\]
+This averages guessing probabilities over the side information; it is not the minimum entropy over all individual conditioning events. No quantum-side-information extension is asserted here.
+
+Let \(X\) be an arbitrary random variable on \(\mathbb Z_M\).
+
+## Theorem 8 — Output min-entropy
+
+\[
+\boxed{H_\infty(Q_{M,D}(X))\ge H_\infty(X)-\log_2D.}
+\]
+More generally, for arbitrary correlated finite side information \(Z\),
+\[
+\boxed{\widetilde H_\infty(Q(X)\mid Z)
+\ge\widetilde H_\infty(X\mid Z)-\log_2D.}
+\]
+
+### Proof
+
+Each quotient fiber contains \(D\) points. For each \(z\),
+\[
+\max_q\sum_{x:Q(x)=q}\Pr[X=x,Z=z]
+\le D\max_x\Pr[X=x,Z=z].
+\]
+Sum over \(z\) and apply \(-\log_2\). A constant \(Z\) gives the unconditional assertion. ∎
+
+## Proposition 8 — Entropy remaining after observing the quotient
+
+Because the quotient alphabet has \(L\) values,
+\[
+\boxed{\widetilde H_\infty(X\mid Z,Q(X))
+\ge\widetilde H_\infty(X\mid Z)-\log_2L.}
+\]
+
+### Proof
+
+Using the joint-mass definition above,
+\[
+p_{\rm guess}(X\mid Z,Q(X))
+=\sum_z\sum_q\max_{x:Q(x)=q}\Pr[X=x,Z=z]
+\le L\sum_z\max_x\Pr[X=x,Z=z].
+\]
+Taking \(-\log_2\) proves the bound. ∎
+
+This finite-leakage bound concerns guessing \(X\) after revealing its quotient; Theorem 8 concerns guessing the quotient itself. They are different statements. The average guarantee also need not hold for every observed quotient: for \(M=4,D=L=2\) and probabilities \((2/5,2/5,1/5,0)\), observing quotient 1 determines \(X=2\). That conditional entropy is zero, although \(H_\infty(X)-\log_2L=\log_2(5/4)>0\).
+
+For uniform \(X\), every conditional fiber is uniform, and
+\[
+\widetilde H_\infty(X\mid Q(X))=\log_2D
+\]
+exactly. These statements, including the standard finite-leakage principle recalled in [2, Section 2], give no computational hardness theorem.
+
+---
+
+# 9. Exact relation to floor-LWR
+
+The floor-rounding formulation in [2, Section 2.1] uses
+\[
+\operatorname{Round}^{\rm floor}_{q\to p}(x)
+=
+\left\lfloor
+\frac{p}{q}[x]_q
+\right\rfloor,
+\]
+with canonical representatives.
+
+Set
+\[
+q=M,\qquad p=L,\qquad M=DL.
+\]
+
+## Theorem 9 — Exact quantizer equivalence
+
+\[
+\boxed{
+Q_{M,D}(x)
+=
+\operatorname{Round}^{\rm floor}_{M\to L}(x).
+}
+\]
+
+### Proof
+
+Since \(L/M=1/D\),
+\[
+\left\lfloor
+\frac{L}{M}[x]_M
+\right\rfloor
+=
+\left\lfloor
+\frac{[x]_M}{D}
+\right\rfloor.
+\]
+∎
+
+Consequently, if the complete problem instance also matches plain LWR — in particular an independently uniform public matrix over \(\mathbb Z_M\), the same secret law, the same number of samples, and the same floor-rounding convention — then the resulting distribution is not merely analogous to LWR: it is an LWR distribution.
+
+For clarity, a full divisible-modulus decision problem with secret law \(\chi\) compares
+\[
+(A,Q_{M,D}(As))\quad\text{and}\quad(A,u),
+\]
+where \(A\leftarrow U(\mathbb Z_M^{m\times n})\), \(s\leftarrow\chi\) and \(u\leftarrow U(\mathbb Z_L^m)\) are independent before forming the observation. The same secret is used in all \(m\) rows. Taking \(\chi=U(\mathbb Z_M^n)\) gives the uniform-secret formulation; a short, binary or CBD secret specifies a different variant whose hardness needs its own justification.
+
+The arithmetic equality includes the degenerate cases \(D=1\) and \(L=1\), but these are not assertions of hardness for an unrounded or constant-output problem. This observation does **not** imply that every MODDIV construction is standard LWR.
+
+---
+
+# 10. Rounding conventions matter
+
+Much of the LWR literature uses nearest-integer modular rounding,
+\[
+\operatorname{Round}^{\rm near}_{q\to p}(x)
+=
+\left\lfloor
+\frac pq[x]_q
+\right\rceil
+\bmod p,
+\]
+with a specified tie rule.
+
+This is generally not equal to \(Q_{M,D}\).
+
+## Proposition 10 — Explicit counterexample
+
+Take
+\[
+M=16,\qquad D=4,\qquad L=4,\qquad x=3.
+\]
+
+Then
+\[
+Q_{16,4}(3)=0,
+\]
+whereas nearest-integer rounding of
+\[
+\frac{4}{16}3=\frac34
+\]
+gives
+\[
+1.
+\]
+
+Therefore the statement
+
+> “MODDIV is LWR”
+
+is incomplete unless the modulus relation, rounding convention and full instance distribution are specified. This counterexample disproves literal equality of the two quantizers; it does not prove that a reduction between conventions is impossible.
+
+The correct statement is:
+
+\[
+\boxed{
+\text{exact-divisor MODDIV quantization}
+=
+\text{floor-LWR quantization}.
+}
+\]
+
+---
+
+# 11. Ring, module, and structured operators
+
+For a vector or polynomial represented in a fixed basis, \(Q_{M,D}\) may be applied coefficientwise.
+
+This still does not identify the resulting hardness problem.
+
+## 11.1 Basis dependence
+
+In Ring/Module-LWR, the basis with respect to which coefficients are rounded can affect both the distribution and the available hardness reductions. Thus coefficientwise quotient extraction is meaningful only after the basis has been fixed.
+
+For a polynomial power basis,
+\[
+1,x,\ldots,x^{n-1},
+\]
+MODDIV-style coefficientwise division corresponds to floor-rounding in that particular basis.
+
+Changing basis before rounding need not preserve the rounded value. For example, with \(M=8,D=2,L=4\),
+\[
+T=\begin{pmatrix}1&1\\0&1\end{pmatrix},\qquad v=\binom{1}{1},
+\]
+we have \(Q(Tv)=\binom{1}{0}\), whereas \([TQ(v)]_4=\binom{0}{0}\). The matrix \(T\) is invertible modulo both 8 and 4. Invertibility alone therefore does not make rounding commute with the coordinate change.
+
+## 11.2 Public-operator dependence
+
+Plain LWR uses an independently uniform matrix.
+
+A Hankel operator
+\[
+H(a)_{ij}=a_{i+j},\qquad0\le i<m,\quad0\le j<n,
+\]
+uses a ribbon of \(m+n-1\) coefficients and reuses them across entries. For a \(2\times2\) Hankel matrix the two off-diagonal entries are always equal; for an independently uniform matrix over \(\mathbb Z_M\), that event has probability \(1/M\). Thus for \(M>1\) the two displayed public laws are different.
+
+Toeplitz, middle-product, ring and module descriptions also require their full joint laws and dimensions to be specified. This is not a claim that all structured descriptions are inequivalent. For example, reversing the columns of a Hankel matrix gives a Toeplitz matrix. The corresponding secret must be reversed too, and its law must be checked. Degenerate dimensions can also make a structured law coincide with a plain one. A difference between displayed laws does not, by itself, rule out a cryptographic reduction.
+
+Therefore
+\[
+Q_{M,D}(H(a)s)
+\]
+may use the same scalar quantizer as LWR while defining a different computational problem.
+
+Security must come from an assumption or reduction for that exact structured distribution.
+
+## 11.3 Existing structured LWR theory
+
+Middle-product computational LWR (MP-CLWR) has a dedicated reduction from **decisional** MP-LWE under the definitions and restrictions of [3, Section 4]. This is not a generic decision-to-decision reduction to arbitrary rounded Hankel observations.
+
+Ring/Module-LWR has a separate hardness literature in which modulus restrictions, secret distributions, rounding bases, leakage, and sample counts matter.
+
+Recent work continues to develop structured LWR assumptions and constructions.
+
+Accordingly, quotient calculus is a compatibility layer, not a substitute for those reductions.
+
+---
+
+# 12. Deterministic post-processing lemma
+
+The following closure principle applies when the pre-rounding joint source already satisfies an indistinguishability premise. Computational claims refer to ensembles indexed by a security parameter, with efficient public arithmetic and explicitly matched dimensions and laws.
+
+## Lemma 11 — Post-processing
+
+Suppose \((A,Y_0)\approx_c(A,Y_1)\) and \(f\) is an efficiently computable deterministic function. Then
+\[
+(A,f(Y_0))\approx_c(A,f(Y_1)).
+\]
+
+### Proof and direction
+
+For any output distinguisher \(\mathcal D\), define
+\(\mathcal B(A,y)=\mathcal D(A,f(y))\). Its acceptance gap on the source pair is **exactly** the acceptance gap of \(\mathcal D\) on the output pair. It makes one call to \(\mathcal D\), takes its time plus the cost of evaluating \(f\), and preserves the number of samples. Thus a solver for the rounded decision problem supplies a solver for the original decision problem: in reduction notation, the source problem reduces to the transformed problem. ∎
+
+In particular, suppose the **joint vector distribution** satisfies
+\[
+(A,Y)\approx_c(A,U_M^d),
+\]
+where \(U_M^d\) is uniform on \(\mathbb Z_M^d\) independently of the entire public view \(A\). For \(D\mid M\), applying \(Q_{M,D}\) coordinatewise gives
+\[
+(A,Q_{M,D}(Y))\approx_c(A,U_L^d).
+\]
+The null distribution is exact because its fibers are products of \(D\)-element fibers.
+
+Marginal uniformity is insufficient in two distinct ways. If \(Z\) is uniform modulo 4 and \(Y=(Z,Z)\), its coordinates are uniform but division by 2 produces only diagonal pairs. If instead \(A=Y\leftarrow U(\mathbb Z_4)\), then \(Y\) itself is uniform, but its quotient is completely known from the public view. Neither premise gives an independent uniform null transcript.
+
+### Noise is not removed by applying a quotient
+
+If the source is \(Y=As+e\), the transformed observation is \(Q(As+e)\), not automatically the noiseless LWR observation \(Q(As)\). For every signed integer perturbation \(e\), exact division gives
+\[
+Q_{M,D}(x+e)
+=\left[Q_{M,D}(x)+\left\lfloor\frac{R_{M,D}(x)+e}{D}\right\rfloor\right]_L.
+\]
+For instance \(M=16,D=4,x=3,e=1\) changes the output from 0 to 1; \(x=0,e=-1\) changes it from 0 to 3. A small perturbation can cross a cell boundary, including the modular boundary. These are deterministic identities; no independent rounding-noise law follows from them.
+
+Consequently this lemma transfers an already-established decision indistinguishability premise for its exact transformed distribution. It does not establish the source premise, erase its noise, recover a secret from a quotient, or prove an IND-CPA/IND-CCA construction.
+
+---
+
+# 13. Non-divisible moduli
+
+The clean product decomposition depends on \(D\mid M\).
+
+Let
+\[
+M=aD+r,\qquad0<r<D.
+\]
+
+Then
+\[
+Q_{M,D}(x)
+=
+\left\lfloor\frac{[x]_M}{D}\right\rfloor
+\]
+takes values
+\[
+0,\ldots,a.
+\]
+
+For a uniform residue,
+\[
+\Pr[Q=u]
+=
+\begin{cases}
+D/M,&0\le u<a,\\
+r/M,&u=a.
+\end{cases}
+\]
+
+The last fiber has \(r\) elements; when \(a\ge1\), it is shorter than the preceding full fibers. The joint law is
+\[
+\Pr[Q=u,R=v]=
+\begin{cases}
+1/M,&0\le u<a,\ 0\le v<D,\\
+1/M,&u=a,\ 0\le v<r,\\
+0,&\text{otherwise}.
+\end{cases}
+\]
+This follows by enumerating the canonical residues \(Du+v<M\).
+
+Thus the equal-fiber product law is lost:
+
+- the quotient is not uniform over its image unless the fiber sizes happen to coincide;
+- the pair \((Q,R)\) is not, in general, distributed as a product of two independent uniform variables;
+- exact uniform randomized lifting fails in its previous form;
+- the codomain is not naturally \(\mathbb Z_L\) for an integer \(L=M/D\);
+- the exact floor-LWR identification of Theorem 9 no longer applies with \(p=M/D\).
+
+The boundary cases should be kept separate. If \(D>M\), then \(Q_{M,D}\) is constant \(0\); it is therefore trivially independent of \(R\), even though the earlier equal-fiber product-of-uniforms statement no longer applies. More generally, the point is the loss of the divisible, equal-fiber structure, not a universal claim of statistical dependence.
+
+For completeness, if \(a\ge1\) and \(0<r<D\), the events \(Q=a\) and \(R=r\) each have positive probability, but their intersection is empty. The variables are then dependent. Together with the constant-quotient case, this proves the exact uniform-input criterion: quotient and remainder are independent if and only if \(D\mid M\) or \(D>M\).
+
+An exact uniform lift remains possible with the **nonuniform** quotient probabilities above: conditionally on \(Q=u\), choose the remainder uniformly in that fiber (size \(D\) for \(u<a\), size \(r\) for \(u=a\)). Each residue then has probability \((|\mathrm{fiber}|/M)/|\mathrm{fiber}|=1/M\). This is not the earlier independent product of two uniform variables.
+
+Non-divisible quotient extraction remains a valid deterministic quantizer, but it belongs to a different arithmetic regime.
+
+---
+
+# 14. What the calculus proves — and what it does not
+
+## PROVED WITH THE STATED ARITHMETIC OR PROBABILITY HYPOTHESES
+
+- exact quotient–remainder decomposition;
+- equal fibers when \(D\mid M\);
+- uniform quotient/remainder independence for uniform input;
+- exact randomized lifting;
+- addition and multioperand carry formulas;
+- multiplication carry formula;
+- nested truncation;
+- min-entropy bounds;
+- exact equivalence with floor-LWR for \(M=DL\).
+
+## NOT PROVED BY THESE IDENTITIES
+
+- one-wayness;
+- LWE hardness;
+- LWR hardness for arbitrary parameters;
+- Ring/Module-LWR hardness;
+- middle-product or Hankel-LWR hardness;
+- IND-CPA or IND-CCA security;
+- independence of structured remainders;
+- security transfer between different rounding bases;
+- security transfer between floor and nearest-integer quantizers.
+
+---
+
+# 15. Related work and contribution boundary
+
+Learning With Rounding was introduced in the lattice-PRF work of Banerjee, Peikert, and Rosen. Alwen, Krenn, Pietrzak, and Wichs subsequently gave improved LWE-to-LWR reductions covering polynomial parameter regimes.
+
+Bai, Boudgoust, Das, Roux-Langlois, Wen, and Zhang developed Middle-Product Learning with Rounding and its applications. Their setting has its own product orientation, dimensions, source laws, and rounding conventions; scalar quotient equality alone does not identify it with a MODDIV construction.
+
+Liu and Wang's *Rounding in the Rings* studies ring/module rounding and makes the representation/basis issue explicit. More recent work by Wang, Jin, Liu, and Yu revisits Ring/Module-LWR under polynomial moduli and entropic secret distributions. These results reinforce the central boundary of this article: structured LWR hardness depends on the full structured distribution, not only on the scalar quantizer.
+
+Against that literature, the contribution of the present article is intentionally limited:
+
+1. a self-contained exact quotient–remainder calculus suitable for modular-division constructions;
+2. a clean separation of carries from fictitious independent noise;
+3. an exact boundary theorem identifying divisible MODDIV quantization with floor-LWR quantization;
+4. explicit counterexamples preventing this identity from being transferred to nearest rounding or to differently structured problems.
+
+The elementary arithmetic identities themselves are not claimed as novel. The supplementary script checks the displayed identities, conditional guessing-probability bounds and counterexamples using exact integer or rational arithmetic; finite tests support reproducibility and do not replace the proofs.
+
+## Bibliographic references
+
+1. Abhishek Banerjee, Chris Peikert, and Alon Rosen, *Pseudorandom Functions and Lattices*, EUROCRYPT 2012, LNCS 7237, pp. 719–737. DOI: 10.1007/978-3-642-29011-4_42.
+2. Joël Alwen, Stephan Krenn, Krzysztof Pietrzak, and Daniel Wichs, *Learning with Rounding, Revisited: New Reduction, Properties and Applications*, CRYPTO 2013, LNCS 8042, pp. 57–74. DOI: 10.1007/978-3-642-40041-4_4. IACR ePrint 2013/098.
+3. Shi Bai, Katharina Boudgoust, Dipayan Das, Adeline Roux-Langlois, Weiqiang Wen, and Zhenfei Zhang, *Middle-Product Learning with Rounding Problem and Its Applications*, ASIACRYPT 2019, LNCS 11921, pp. 55–81. DOI: 10.1007/978-3-030-34578-5_3. IACR ePrint 2019/1001.
+4. Feng-Hao Liu and Zhedong Wang, *Rounding in the Rings*, CRYPTO 2020, Part II, pp. 296–326. DOI: 10.1007/978-3-030-56880-1_11.
+5. Zhedong Wang, Haoxiang Jin, Feng-Hao Liu, and Yang Yu, *Revisiting the Robustness of (R/M)LWR Under Polynomial Moduli with Its Applications*, ASIACRYPT 2025, Part III, LNCS 16247, pp. 167–199. DOI: 10.1007/978-981-95-5099-9_6. First published online 8 December 2025; the Springer citation/copyright year is 2026.
+
+---
+
+# 16. Final conclusion
+
+Modulo followed by exact integer division is best understood as a deterministic quantizer with hidden local coordinates.
+
+When
+\[
+M=DL,
+\]
+the quotient and remainder give exact coordinates
+\[
+[x]_M=DQ+R.
+\]
+
+All additive and multiplicative deviations from linear quotient arithmetic are determined by explicit carries formed from the hidden remainders.
+
+At the same time,
+\[
+Q_{M,D}(x)
+=
+\left\lfloor\frac{L}{M}[x]_M\right\rfloor,
+\]
+so exact-divisor modular division is precisely floor-LWR quantization.
+
+This does not collapse all MODDIV constructions into the same cryptographic problem. Once public matrices become Toeplitz, Hankel, middle-product, ring, module, or other structured operators, and once rounding bases or secret laws change, a hardness theorem must apply to the resulting full distribution, directly or through a justified reduction.
+
+The methodological conclusion is therefore:
+
+\[
+\boxed{
+\text{same arithmetic quantizer}
+\not\Rightarrow
+\text{same hardness assumption}.
+}
+\]
+
+The quotient–remainder calculus is useful precisely because it identifies what is arithmetic, what is distributional, and what still requires cryptographic reduction.

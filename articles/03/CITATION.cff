@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: Please cite this research manuscript using the preferred citation below.
+title: 'A Quotient–Remainder Calculus for Modular Rounding: Exact Carries, Distributional Laws, Nested Truncation, and the
+  Boundary with Learning With Rounding'
+authors:
+- &id001
+  family-names: Bouftass
+  given-names: Samir
+version: '4.3'
+keywords:
+- modular arithmetic
+- quotient and remainder
+- carries
+- randomized lifting
+- Learning With Rounding
+preferred-citation:
+  type: unpublished
+  title: 'A Quotient–Remainder Calculus for Modular Rounding: Exact Carries, Distributional Laws, Nested Truncation, and the
+    Boundary with Learning With Rounding'
+  authors:
+  - *id001
+  version: '4.3'
+  year: 2026

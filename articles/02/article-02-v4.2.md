@@ -1,0 +1,343 @@
+# C1-K4 in the QROM: Structural Bounds and a Conservative Conditional Reduction
+
+**Revision V4.2 — 13 November 2026 — Article 2 only**
+
+**Samir Bouftass**
+
+*Research assistance: ChatGPT (OpenAI). Samir Bouftass is responsible for the scientific content of this archival edition.*
+
+## Abstract
+
+We give a conservative conditional QROM advantage bound for the frozen, 1760-byte C1-K4-P12-CBD1 KEM. The model is single-user and key-first, with fresh independent quantum-accessible ideal oracles, classical challenge messages and classical decapsulation queries. The source assumptions are the exact four-row and five-row small-secret Module-LWE distributions, now against quantum distinguishers at the reductions' augmented resources. No concrete expander or 128-bit security certification is asserted.
+
+Re-encryption checking gives rigidity, and independent CBD1 encryption errors give spreadness at least \(1280\log_2(4/3)=531.247999\ldots\). We combine the averaged worst-message correctness bound from Article 1 with an extractable-oracle search lemma. This bounds failure finding directly; the sharper FFP-NG/FFP-NK decomposition is optional for this coarse route. A coherent oracle simulation maps the exact ciphertext-dependent KDF and implicit rejection to an explicitly rejecting reference transform. Section 6 states the resulting inequality, query allowances and runtime obligations.
+
+The earlier FFP-NK diagnostics and the second-moment result imported from Article 4 remain possible improvements. They are not needed by the conservative theorem, and are not interpreted as KEM security bits. Matching the newer Ring/Module-LWE FFP-NG literature to C1-K4 remains open. The 1792-byte confirmation-tag format is recorded separately and is not substituted for the frozen scheme.
+
+## 1. Frozen scheme and security experiment
+
+### 1.1 Parameters and distributions
+
+Use the PKE of Article 1, revision V4.1, Sections 3–7. Let
+\[
+R=\mathbb Z_{4096}[X]/(X^{256}+1),\qquad k=4,
+\qquad F_d(x)=\lfloor[x]_{4096}/d\rfloor
+\]
+coefficientwise. Here \(s,e_0,r,e_1\in R^4\) and \(e_2\in R\). CBD1 has masses \(1/4,1/2,1/4\) on \(-1,0,1\). All coefficients of \(s,e_0,r,e_1,e_2\) are independent CBD1 draws; \(\rho\) has 1024 independent uniform coefficients in \(\{0,1,2,3\}\). The message is \(m\in\{0,1\}^{256}\), interpreted as a polynomial \(\mu\). With \(A\in R^{4\times4}\),
+\[
+b=F_4(As+e_0),\qquad v=4b+\rho,
+\]
+\[
+c_1=F_2(A^Tr+e_1),\qquad
+c_2=F_2(v^Tr+e_2+2048\mu).
+\]
+The coefficient of \([2c_2-(2c_1)^Ts]_{4096}\) decodes to one exactly when it lies strictly between 1024 and 3072; ties decode to zero. Canonical fixed-width packing and the 2816-byte uniform-tape sampler are those of Article 1. Ignored tape bits do not require an injectivity assumption.
+
+### 1.2 Oracles and exact wrapper
+
+The independent oracles are \(H_A\) for the seeded matrix, \(G\) for the 2816-byte encryption tape, and \(H\) for a 256-bit session key. Tuple encodings are injective and the three oracle families have distinct domains. In particular,
+\[
+\operatorname{Enc}_1(pk,m)=\operatorname{Enc}(pk,m;G(pk,m)).
+\]
+Key generation stores one independent uniform \(z\in\{0,1\}^{256}\). Encapsulation chooses uniform \(m\), sends \(c=\operatorname{Enc}_1(pk,m)\), and returns \(H(pk,m,c)\). Decapsulation returns
+\[
+\begin{cases}
+H(pk,m',c),&\text{if parsing succeeds, decryption gives }m',
+                  \text{ and }\operatorname{Enc}_1(pk,m')=c,\\
+H(pk,z,c),&\text{otherwise}.
+\end{cases}
+\]
+Equality means equality of the entire canonical ciphertext byte string. Invalid lengths and malformed encodings take the fallback branch. Repeated rejected strings receive consistent keys. Good and fallback outputs use the **same** \(H\) family: there is no additional branch tag. Domain separation between oracle families must not be confused with changing this specified fallback rule.
+
+The public key has 1313 bytes and the ciphertext 1760 bytes. No algorithm, distribution, compression divisor or parameter is changed in this revision.
+
+### 1.3 Scope of the quantum experiment
+
+We analyze one honestly generated key. The public key is given before the adversary's first oracle query. All ideal oracles start fresh; there is no auxiliary state correlated with an earlier execution of these oracles. The adversary can query them in superposition, but submits classical challenge choices and classical ciphertexts to decapsulation. The challenge ciphertext is excluded from decapsulation. This is not a theorem for a superposition decapsulation oracle, multiple users, shared prior oracle advice, or an instantiated hash such as SHAKE256.
+
+Write \(q_A,q_G,q_H,q_D\) for the adversary's matrix-oracle, tape-oracle, key-oracle and decapsulation query bounds. An IND-CCA advantage is the success bias \(|\Pr[\widehat\beta=\beta]-1/2|\). Module-LWE source advantages are acceptance-probability gaps. The passive PKE advantage convention in the imported HHM theorem is also an acceptance gap, which is twice the corresponding success bias; Section 6 retains this factor.
+
+### 1.4 Quantum passive-security premise
+
+For \(j=4,5\), the exact source distinguishes \((B,Bt+e)\) from \((B,y)\), where
+\[
+B\leftarrow U(R^{j\times4}),\quad
+t\leftarrow\operatorname{CBD1}^{1024},\quad
+e\leftarrow\operatorname{CBD1}^{256j},\quad y\leftarrow U(R^j).
+\]
+Let \(\epsilon_{4,j}^{Q}\) bound the acceptance gaps of the quantum distinguishers constructed below, at their actual augmented time, memory and independent auxiliary-oracle query budgets. These are quantum source assumptions, not classical attack estimates.
+
+**Lemma 1 (passive reduction in the stated model).** The randomized seeded PKE has quantum-adversary CPA success bias at most
+\[
+\epsilon_{4,4}^{Q}+\epsilon_{4,5}^{Q}.
+\]
+
+*Proof.* Article 1's two source simulations use classical public keys and challenge messages and run the adversary as a subroutine. They neither copy nor rewind its quantum state. The first simulation uses \((A,y)\) to publish \(F_4(y)\). The second partitions its five-row source as \(B=(A^T;V^T)\), publishes \(F_4(V)\), and uses the five source responses for the challenge. The quotient/remainder bijection makes the retained lift \(V\) have the correct conditional law. In the uniform-response game the ciphertext distribution is independent of the challenge bit, also against a quantum subroutine. The two changes in its success probability are bounded by the two source gaps.
+
+For the seeded key, each simulation receives its source sample first, chooses a uniform 256-bit matrix seed, and defines the matrix oracle **before** invoking the adversary. At the 16 entry addresses for this seed it uses the supplied \(A\); each coefficient is completed with four fresh uniform high bits to form the full 16-bit raw response. Other addresses use an independent oracle. In both source cases \(A\) is uniform, so the joint oracle/seed/matrix law is exactly the honest one. Equality tests and controlled XORs implement this finite patch coherently. No already-queried oracle is reprogrammed. The classical prior-query collision estimate from Article 1 is therefore neither transferred to quantum queries nor needed in this key-first simulation. Earlier oracle-correlated advice would invalidate this argument and is outside the experiment. ∎
+
+This lemma does not establish hardness of either source, or identify a concrete expander with an ideal oracle. Raw high bits, although ignored by matrix parsing, are part of the oracle view and are explicitly simulated.
+
+## 2. Rigidity
+
+Define deterministic decryption \(\operatorname{Dec}_1\) to output \(m'\) only when decrypting and re-encrypting produces the exact input ciphertext; otherwise it outputs failure. Then
+\[
+\operatorname{Dec}_1(sk,c)=m\ne\bot
+\Longrightarrow
+c=\operatorname{Enc}_1(pk,m).
+\]
+
+Hence the deterministic scheme is rigid exactly. This statement concerns accepted ciphertexts. It does not assert perfect correctness, injectivity of encryption, or security of the fallback key.
+
+## 3. Spreadness
+
+Fix \(pk,m\) and an arbitrary target ciphertext \((c_1,c_2)\). Condition on the ephemeral secret \(r\) and the lifting vector \(\rho\).
+
+For a fixed pre-error coefficient \(x\), the map
+\[
+e\in\{-1,0,1\}
+\longmapsto
+\left\lfloor\frac{[x+e]_{4096}}{2}\right\rfloor
+\]
+assigns probability at most \(3/4\) to any fixed output value under CBD1. The 1024 coefficients of \(e_1\) affect the 1024 compressed coefficients of \(c_1\) independently once \(r\) is fixed. The 256 coefficients of \(e_2\) affect the 256 coefficients of \(c_2\) independently once \((r,\rho)\) is fixed. Therefore
+\[
+\Pr[\operatorname{Enc}(pk,m)=c\mid r,\rho]
+\le(3/4)^{1280}.
+\]
+
+Averaging over \((r,\rho)\) preserves the same upper bound, so
+\[
+\boxed{\gamma\ge1280\log_2(4/3)=531.247999\ldots.}
+\]
+
+## 4. FFP-NK bounds: optional refinements
+
+For a fixed generated key pair \(K=(pk,sk)\), including the matrix-oracle environment, define
+\[
+d(K)=\max_m\Pr_\omega[\operatorname{Dec}(sk,\operatorname{Enc}(pk,m;\omega))\ne m],
+\quad \delta_{wc}=\mathbb E_K d(K).
+\]
+For a fixed message and complete encryption tape, let
+\[
+p_m(\omega)=\Pr_K[\operatorname{Dec}(sk,\operatorname{Enc}(pk,m;\omega))\ne m],
+\]
+\[
+\delta_{ik}=\max_m\mathbb E_\omega p_m(\omega),\qquad
+\sigma_{\delta ik}^2=\max_m\operatorname{Var}_\omega p_m(\omega).
+\]
+The key in \(p_m\) is fresh and independent of \((m,\omega)\). These are averaged-key statements, not uniform guarantees for all keys. Article 1, Sections 4–5 and Corollary 4, proves
+\[
+\delta_{wc}<2^{-212}.
+\]
+The Failing-Gracefully definitions give
+\[
+\delta_{ik}\le\delta_{wc}<2^{-212}.
+\]
+
+Since \(0\le p_m(\omega)\le1\), we have
+\[
+\operatorname{Var}[p_m(\omega)]
+\le
+\mathbb E[p_m(\omega)]
+\le
+\delta_{ik}.
+\]
+Thus the generic consequence is only
+\[
+\sigma_{\delta ik}<2^{-106}.
+\]
+
+Article 4 strengthens this with an exact same-randomness/two-independent-key calculation:
+\[
+\mathbb E_\omega[p_m(\omega)^2]<2^{-247},
+\qquad
+\sigma_{\delta ik}<2^{-123.5}.
+\]
+This is an imported Article 4 result, not a new proof or audit of Article 4. The conservative theorem in Section 6 does not depend on it.
+
+There is also a distinct consequence using only the mean. We use Hövelmanns–Hülsing–Majenz, *Failing Gracefully: Decryption Failures and the Fujisaki–Okamoto Transform*, published version, Lemma 4, equation (30), p. 439. Here \(q\) counts the adversary's eCO.RO queries before the final oracle evaluation; the additional final evaluation is accounted for by \(q+1\). The bound is stated in that lemma's extractable-oracle model. One fixed adversary is used for every threshold; its uniform input bits are mapped to the honest CBD1 and lifting distributions. Identifying this \(q\) with a complete KEM reduction's query budget is a separate composition obligation.
+
+With Markov's inequality, the resulting tail bound is
+\[
+\Pr[F_{\rm out}\ge t]
+\le
+\min\!\left(1,\frac{152(q+1)^2\delta_{ik}}{t}\right).
+\]
+Writing
+\[
+a=152(q+1)^2\delta_{ik},
+\]
+integration of this tail for the same output variable gives, for \(0<a<1\),
+\[
+\mathbb E[F_{\rm out}]
+\le
+a\bigl(1+\ln(1/a)\bigr),
+\]
+where \(\ln\) is the natural logarithm. The full bound is 0 at \(a=0\) and 1 when \(a\ge1\). A bound above 1 is never reported as a probability.
+At \(\delta_{ik}=2^{-212}\), the corresponding diagnostic values
+\[
+-\log_2(\text{bound})
+\]
+are approximately \(195.607\), \(165.836\), \(134.129\), and \(70.992\) for
+\[
+q=1,\quad2^{16},\quad2^{32},\quad2^{64},
+\]
+respectively.
+
+These values describe one FFP-NK term only. They are not KEM security bits and do not include FFP-NG, passive security, KDF/oracle composition, or other reduction losses.
+
+## 5. FFP-NG: updated literature status
+
+FFP-NG asks whether a public-key-dependent adversary can choose message/randomness pairs whose failure behavior differs between the displayed key and an independent key. No implication from passive IND-CPA security to FFP-NG security is proved or used here.
+
+Earlier work treated a PVW-style LWE setting with discrete-Gaussian errors. A later preprint by Christian Majenz and Fabrizio Sisinni, *Provable decryption failure security for practical lattice-based PKE*, IACR ePrint 2025/1997, states that its analysis extends to Ring-LWE and Module-LWE and considers a subgaussian family containing centered binomials.
+
+This is directly relevant to C1-K4 and invalidates the broad statement that available FFP-NG reductions are restricted to discrete Gaussians. However, this article has not established that the newer theorem applies unchanged to all of the following C1-K4 details:
+
+- the exact CBD1 secret and error laws;
+- the module dimensions and modulus \(4096\);
+- the two compression divisors \(Q=4\) and \(C=2\);
+- the randomized lifting interface;
+- the dependent rounding remainders in the decryption-failure event;
+- the exact FFP game induced by the compact wrapper.
+
+Therefore the correct present statement is:
+
+\[
+\boxed{\text{FFP-NG applicability to the exact C1-K4 interface remains unproved here.}}
+\]
+
+This is an open matching problem, not an impossibility result.
+
+
+This matching problem is needed for the proposed sharper failure decomposition, not for every QROM proof. Hövelmanns–Majenz, PQCrypto 2024 / ePrint 2023/1811, explicitly studies a route using worst-case correctness instead. Section 6 below derives a coarse bound directly from the HHM search lemma and reference-transform theorem; it does not claim to instantiate the sharper constants of that later paper.
+
+## 6. A conservative bound for the exact compact wrapper
+
+### 6.1 Direct failure finding from worst-case correctness
+
+**Lemma 2.** In the HHM extractable-oracle model, a failure-finding adversary receiving \(pk\) and making at most \(u\) random-oracle queries before its final evaluation satisfies
+\[
+\operatorname{Adv}_{FFP\text{-}CPA}
+\le \min\{1,152(u+1)^2\delta_{wc}\}.
+\tag{1}
+\]
+
+*Proof.* Fix the entire generated key and matrix environment \(K\). Take the relation consisting of pairs \((m,\omega)\) for which encryption fails to decrypt to \(m\). Its maximum density over messages is \(d(K)\). HHM's search lemma gives at most \(152(u+1)^2d(K)\), also with extraction queries. If the combined oracle returns both a tape and a key-hash value, use the tape projection; its density is unchanged. The key and matrix environment are independent of the fresh tape and key-hash oracles. Thus the lemma applies separately for every fixed environment. Averaging over \(K\), and capping by one, proves (1). This step uses \(\mathbb E_K\max_m\), rather than incorrectly replacing it by \(\max_m\mathbb E_K\). ∎
+
+The source is HHM's full version, Lemma 5, equation (51); the published search lemma is numbered Lemma 4, equation (30). The \(+1\) pays for the final evaluation. Extraction queries do not add to this particular search bound, but still contribute to the total reduction cost.
+
+### 6.2 Exact KDF and rejection simulation
+
+Consider the HHM reference transform with tape oracle \(g(m)\), good key \(h(m)\), re-encryption checking and explicit rejection. Fix its public key \(pk_*\), and define
+\[
+E(m)=\operatorname{Enc}(pk_*,m;g(m)).
+\]
+Take independent auxiliary oracles \(G_0,H_0\). Simulate the target oracles by
+\[
+\widehat G(pk,m)=
+\begin{cases}g(m),&pk=pk_*,\\G_0(pk,m),&\text{otherwise},\end{cases}
+\]
+\[
+\widehat H(pk,m,c)=
+\begin{cases}h(m),&pk=pk_*\text{ and }c=E(m),\\
+H_0(pk,m,c),&\text{otherwise}.\end{cases}
+\tag{2}
+\]
+Inputs outside the well-formed tuple domains use the independent auxiliary oracle branches.
+
+**Lemma 3.** This simulates the exact compact wrapper's transcript, including quantum hash queries, with no additive distinguishing loss.
+
+*Proof.* Conditional on \(g\) and the matrix environment, each graph address \((pk_*,m,E(m))\) is a different address because its message coordinate is present. Independent \(h(m)\) values at these addresses and independent \(H_0\) values everywhere else therefore give a uniformly random function \(\widehat H\), independent of \(g\). Collisions between ciphertexts \(E(m)\) do not change this conclusion. The same argument for the public-key slice makes \(\widehat G\) uniform. Computing the predicates, applying controlled XORs and uncomputing all work registers realizes the corresponding oracle unitaries on arbitrary superpositions, not merely a classical lookup simulation.
+
+Choose one uniform fallback \(z\) and retain it. Forward each permitted classical decapsulation query to the explicit-rejection oracle. If it returns a key, return that key: its accepted message \(m'\) necessarily satisfies \(c=E(m')\), so the returned value is exactly \(\widehat H(pk_*,m',c)\). If it returns failure, compute and return \(\widehat H(pk_*,z,c)\). This also handles malformed byte strings and the case that the fallback address lies on the graph. The reference challenge key is \(h(m_*)=\widehat H(pk_*,m_*,E(m_*))\). Consequently both challenge games have exactly the required target law. The simulation does not expose the reference validity flag to the target adversary. ∎
+
+The auxiliary oracles are independent and their resource use is charged to the reductions. The generic reduction is relativized to the independent matrix and auxiliary oracles: encryption and its reversible evaluation use the same matrix oracle, and their calls are included in the source distinguishers' resources. No assumption that the good and fallback hash domains are disjoint is made.
+
+### 6.3 Query allowances and composed inequality
+
+A conservative coherent implementation of (2) uses at most two calls to \(g\) per target \(G\) query, two to \(g\) and two to \(h\) per target \(H\) query, and at most two to each per simulated fallback. These bounds allow compute–use–uncompute and do not presume free controlled access to an unknown oracle. We may therefore take
+\[
+Q_G=2(q_G+q_H+q_D),\quad Q_H=2(q_H+q_D),
+\]
+\[
+R=Q_G+Q_H,\qquad U=R+q_D.
+\tag{3}
+\]
+The reference adversary's combined oracle depth is at most \(R\), by serializing its queries. Its decapsulation budget remains \(q_D\). Internal reference-transform operations are covered by the imported theorem's \(q_D\) allowances; they are not mistaken for free adversarial queries.
+
+**Theorem 4 (conditional, single-user, key-first QROM bound).** In the experiment of Section 1.3, for the exact compact wrapper of Section 1.2,
+\[
+\begin{aligned}
+\operatorname{Adv}_{CCA}^{Q}(\mathcal A)\le\min\biggl\{\frac12,\;&
+4\sqrt{2U(\epsilon_{4,4}^{Q}+\epsilon_{4,5}^{Q})}
++8U\,2^{-128}\\
+&+(q_D+1)\min\{1,152(U+1)^2\,2^{-212}\}\\
+&+24q_D(Q_G+4q_D)(3/4)^{640}
+\biggr\}.
+\tag{4}
+\end{aligned}
+\]
+
+*Proof.* Apply Lemma 3. For the explicitly rejecting reference transform, HHM full-version Corollary 8, equations (69)–(70), gives
+\[
+4\sqrt{(d+q_D)\alpha_{CPA}}
++\frac{8(Q_G+Q_H+q_D)}{\sqrt{|\mathcal M|}}
++(q_D+1)\operatorname{Adv}_{FFP\text{-}CPA}
++24q_D(Q_G+4q_D)2^{-\gamma/2}.
+\tag{5}
+\]
+Here \(\alpha_{CPA}\) is a PKE acceptance gap, whereas the left-hand KEM advantage is a success bias. Lemma 1 therefore gives
+\(\alpha_{CPA}\le2(\epsilon_{4,4}^{Q}+\epsilon_{4,5}^{Q})\).
+The failure-finding adversary in that corollary uses at most \(Q_G+Q_H+q_D=U\) extractable random-oracle queries, so Lemma 2 applies with \(u=U\). Use \(d+q_D\le U\), \(|\mathcal M|=2^{256}\), Article 1's \(\delta_{wc}<2^{-212}\), and Section 3's \(2^{-\gamma/2}\le(3/4)^{640}\). Substitution gives (4). ∎
+
+The nonzero failure probability has not been dropped: Article 1 establishes \(2^{-8192}\le\delta_{wc}<2^{-212}\). The failure contribution in (4) grows roughly cubically if all query budgets grow together. This conservative bound is not advertised as tight.
+
+### 6.4 Runtime, model limits and numerical meaning
+
+The source gaps in (4) are evaluated for the constructed quantum algorithms, not at the original attacker's unaugmented runtime. The oracle simulation costs
+\[
+T_{patch}=O((q_G+q_H+q_D)T_{Enc}
++(q_A+q_G+q_H+q_D)L),
+\]
+where \(L\) covers the finite domain comparisons, raw-response patches and XOR work, and \(T_{Enc}\) includes coherent matrix expansion and arithmetic. The HHM reduction further incurs
+\[
+T_{eCO}(R+q_D)+O(q_D)
+\]
+in the convention of its Corollary 8. Finally add the two source simulations' public PKE computations. Memory, independent auxiliary-oracle queries, and matrix-oracle calls inside encryption/extraction must be charged as well. These are explicit symbolic overhead obligations; this article does not provide a gate-level cost for \(T_{eCO}\) or a numerical source-hardness certificate. Auxiliary random oracles are independent of the source samples except for the explicitly simulated matrix slice.
+
+The theorem gives an end-to-end **conditional advantage inequality in its stated ideal model**. It is not an unconditional hardness theorem, a proof for arbitrary prior oracle state, or a certification of a production implementation. In particular, classical MATZOV/coded-dual estimates cannot be substituted for \(\epsilon_{4,j}^{Q}\) as though they were proven quantum lower bounds.
+
+## 7. Confirmation tags and sharper routes
+
+Appending a 256-bit value \(H'(m)\) would produce a distinct 1792-byte format. A byte count alone does not specify its complete KDF, validation rules or QROM reduction. No theorem for that modified format is asserted here, and it is not needed by Theorem 4.
+
+The FFP-NK mean and second-moment estimates in Section 4, combined with a future exact FFP-NG reduction, may improve the coarse failure term in (4). This is a refinement problem. Failure to establish that sharper route is not evidence that every QROM reduction is impossible.
+
+## 8. Claim ledger and reproducibility
+
+| Claim | Status and scope |
+|---|---|
+| Frozen algorithms, distributions and 1313/1760-byte sizes | Unchanged; Section 1 and Article 1 V4.1. |
+| Rigidity and spreadness | Proved here for the stated re-encryption check and randomized PKE. |
+| Quantum passive reduction | Proved conditionally on the exact quantum source assumptions, in the key-first fresh-oracle model. |
+| Direct FFP-CPA bound | Proved from worst-case correctness and the stated HHM search lemma. |
+| Exact KDF / implicit-rejection transfer | Proved by the coherent graph simulation (2). |
+| End-to-end compact QROM bound | Theorem 4, conditional and conservative; source resources are augmented. |
+| FFP-NK integrated mean bound | Proved in the stated search model; diagnostic only. |
+| FFP-NK second moment | Imported from Article 4; not required by Theorem 4. |
+| Sharper FFP-NG match for C1-K4 | Open; not a prerequisite of the coarse bound. |
+| Concrete expander, quantum source lower bounds, gate-level costs, 128-bit certification | Not established. |
+| 1792-byte confirmation variant | Format observation only; no instantiated security theorem. |
+
+The supplement checks all 4096 rounding positions, exact raw-bit distributions, toy-model oracle-graph uniformity and rejection simulation (including collisions and malformed inputs), probability caps, advantage normalization and numerical diagnostics. It is executable evidence for these finite identities and arithmetic. It does not mechanically verify the HHM theorem, quantum hardness assumptions or the full reduction proof.
+
+## References
+
+- Samir Bouftass and ChatGPT (OpenAI), *C1-K4-P12-CBD1: Exact Correctness, Conditional Security, and Reproducible Attack Estimates*, Article 1, V4.1, 13 November 2026. Sections 3–7 and Corollary 4. Companion manuscript, unchanged by this revision.
+- Samir Bouftass and ChatGPT (OpenAI), *Find-Failing-Plaintext Analysis of C1-K4-P12-CBD1*, Article 4, V4, 13 November 2026. Sections 3–5. Imported refinement only; this revision does not audit Article 4.
+- Kathrin Hövelmanns, Andreas Hülsing, Christian Majenz, *Failing Gracefully: Decryption Failures and the Fujisaki–Okamoto Transform*. ASIACRYPT 2022, LNCS 13794, pp. 414–443. https://doi.org/10.1007/978-3-031-22972-5_15. Published search lemma: Lemma 4, equation (30), p. 439. For the composed proof we use the full version https://arxiv.org/abs/2203.10182, specifically Lemma 5 (51), Corollary 8 (69)–(70), and the advantage definitions in Section 2. The consulted full-version PDF is identified by SHA-256 in the supplement; numbering is not mixed between editions.
+- Kathrin Hövelmanns, Christian Majenz, *A Note on Failing Gracefully: Completing the Picture for Explicitly Rejecting Fujisaki–Okamoto Transforms Using Worst-Case Correctness*. PQCrypto 2024, LNCS 14772, pp. 245–265. https://doi.org/10.1007/978-3-031-62746-0_11; https://eprint.iacr.org/2023/1811. Context for the worst-case-correctness alternative; its sharper theorem constants are not imported.
+- Dennis Hofheinz, Kathrin Hövelmanns, Eike Kiltz, *A Modular Analysis of the Fujisaki–Okamoto Transformation*. TCC 2017; corrected full version https://eprint.iacr.org/2017/604. Background for the FO/QFO variants, not the source of equation (4).
+- Christian Majenz, Fabrizio Sisinni, *Provable Security Against Decryption Failure Attacks from LWE*. CRYPTO 2024, LNCS 14921, pp. 456–485. https://doi.org/10.1007/978-3-031-68379-4_14; https://eprint.iacr.org/2024/835. Earlier PVW-style setting.
+- Christian Majenz, Fabrizio Sisinni, *Provable decryption failure security for practical lattice-based PKE*. Cryptology ePrint Archive 2025/1997. https://eprint.iacr.org/2025/1997. The abstract establishes the relevance of Ring/Module-LWE and centered binomials; no exact C1-K4 hypothesis match is claimed.
