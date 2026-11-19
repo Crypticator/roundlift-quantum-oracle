@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: Please cite this research manuscript using the preferred citation below.
+title: 'From Correctness to the Quantum Oracle: Exact Modular Rounding, Structured Cryptanalysis, and Conditional Security
+  of C1-K4'
+authors:
+- &id001
+  family-names: Bouftass
+  given-names: Samir
+version: '0.6'
+keywords:
+- lattice cryptography
+- modular rounding
+- Module-LWE
+- quantum random-oracle model
+- decryption failures
+preferred-citation:
+  type: thesis
+  title: 'From Correctness to the Quantum Oracle: Exact Modular Rounding, Structured Cryptanalysis, and Conditional Security
+    of C1-K4'
+  authors:
+  - *id001
+  version: '0.6'
+  year: 2026
